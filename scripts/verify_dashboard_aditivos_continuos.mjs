@@ -32,7 +32,7 @@ async function test() {
   const { data: alteracoes } = await supabase.from('alteracoes_contratuais').select('*');
   const { data: contratos } = await supabase.from('contratos').select('*');
 
-  for (const c of contratos.filter(x => x.numero_contrato && (x.numero_contrato.startsWith('15/') || x.numero_contrato.startsWith('17/')))) {
+  for (const c of contratos.filter(x => x.numero_contrato && (x.numero_contrato.includes('015') || x.numero_contrato.includes('017')))) {
     const alts = alteracoes.filter(a => a.contrato_id === c.id);
     const isContinuo = c.tipo_contrato === 'CONTINUO';
     const valorInicialNum = Number(c.valor_inicial) || 0;
