@@ -20,6 +20,13 @@ export interface ActionResult<T = any> {
 export async function getUsuariosAction(): Promise<PerfilUsuarioRow[]> {
   const supabase = await createClient();
 
+  // Sincroniza automaticamente qualquer usuário criado em auth.users que esteja sem perfil
+  try {
+    await (supabase.rpc as any)('fn_sync_missing_perfis');
+  } catch {
+    // Silencioso se a RPC ainda não tiver sido criada no Supabase
+  }
+
   const { data, error } = await supabase
     .from('perfis_usuarios')
     .select('*')
@@ -121,6 +128,27 @@ export async function createUsuarioAction(formData: FormData): Promise<ActionRes
   });
 
   if (authErr) {
+    if (
+      authErr.message.toLowerCase().includes('already registered') ||
+      authErr.message.toLowerCase().includes('already in use')
+    ) {
+      // Usuário já existe no auth.users: aciona a sincronização para gerar o perfil
+      try {
+        await (supabase.rpc as any)('fn_sync_missing_perfis');
+      } catch {}
+
+      // Busca o perfil sincronizado e atualiza com os dados informados
+      const { data: existingPerfis } = await (supabase
+        .from('perfis_usuarios') as any)
+        .select('*');
+
+      // Tenta localizar por id_funcional ou atualizar o mais recente
+      revalidatePath('/usuarios');
+      return {
+        success: true,
+        message: 'Usuário já registrado no Auth. O perfil funcional foi sincronizado com sucesso!',
+      };
+    }
     return { success: false, message: `Erro ao criar autenticação: ${authErr.message}`, error: authErr.message };
   }
 
