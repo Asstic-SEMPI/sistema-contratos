@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --surface: #FFFFFF;
+  --border-ledger: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --sempi-plum: #581526;
+  --sempi-teal: #0D3B3E;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tipografia Mono Tabular para Cálculos e Códigos Governamentais */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Divisórias Sutis */
+.ledger-hairline {
+  border-width: 1px;
+  border-color: var(--border-ledger);
+}
+
+.ledger-hairline-b {
+  border-bottom: 1px solid var(--border-ledger);
+}
+
+.ledger-hairline-t {
+  border-top: 1px solid var(--border-ledger);
+}
+
+.ledger-hairline-r {
+  border-right: 1px solid var(--border-ledger);
+}
+
+.ledger-hairline-l {
+  border-left: 1px solid var(--border-ledger);
+}
+
+/* Custom Scrollbars Técnicas e Modernas */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Proteção de Quebra de Tabelas em Dispositivos Móveis */
+.table-responsive-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
