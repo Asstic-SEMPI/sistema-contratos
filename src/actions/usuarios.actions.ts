@@ -88,8 +88,24 @@ export async function createUsuarioAction(formData: FormData): Promise<ActionRes
 
   const emailRedirectTo = `${baseUrl}/login`;
 
-  // 3. Cadastro no Auth do Supabase com Redirecionamento Seguro
-  const { data: authData, error: authErr } = await supabase.auth.signUp({
+  // 3. Criação das credenciais no Auth do Supabase
+  // IMPORTANTE: Usamos createServerClient com cookies em branco (no-op)
+  // para que o signUp NÃO sobrescreva a sessão do Administrador logado nos cookies!
+  const { createServerClient } = await import('@supabase/ssr');
+  const authClient = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return [];
+        },
+        setAll() {},
+      },
+    }
+  );
+
+  const { data: authData, error: authErr } = await authClient.auth.signUp({
     email,
     password,
     options: {
