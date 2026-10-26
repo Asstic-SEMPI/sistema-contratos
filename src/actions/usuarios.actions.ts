@@ -20,6 +20,20 @@ export interface ActionResult<T = any> {
 export async function getUsuariosAction(): Promise<PerfilUsuarioRow[]> {
   const supabase = await createClient();
 
+  // Validação de sessão e privilégio de Administrador
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: rawCallerProfile } = await supabase
+    .from('perfis_usuarios')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if ((rawCallerProfile as any)?.role !== 'ADMIN') {
+    return [];
+  }
+
   // Sincroniza automaticamente qualquer usuário criado em auth.users que esteja sem perfil
   try {
     await (supabase.rpc as any)('fn_sync_missing_perfis');

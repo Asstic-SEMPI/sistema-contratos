@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -65,6 +65,7 @@ const NAV_ITEMS = [
     label: 'Usuários & Perfis',
     sublabel: 'Controle RBAC & Acessos',
     icon: UserCog,
+    adminOnly: true,
   },
   {
     href: '/perfil',
@@ -77,6 +78,14 @@ const NAV_ITEMS = [
 export function AppNavigation({ userEmail, profile, children }: AppNavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  const isAdmin = profile?.role === 'ADMIN';
+  const visibleNavItems = useMemo(() => {
+    return NAV_ITEMS.filter((item) => {
+      if (item.adminOnly && !isAdmin) return false;
+      return true;
+    });
+  }, [isAdmin]);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
@@ -184,7 +193,7 @@ export function AppNavigation({ userEmail, profile, children }: AppNavigationPro
             <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">
               Navegação Estruturada
             </div>
-            {NAV_ITEMS.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const isActive =
                 item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { redirect } from 'next/navigation';
 import { getUsuariosAction } from '@/actions/usuarios.actions';
 import { getUserProfile } from '@/lib/auth/get-user-profile';
 import { UsuariosTableClient } from '@/components/usuarios/UsuariosTableClient';
@@ -7,10 +8,14 @@ import { Users, Shield } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function UsuariosPage() {
-  const [usuarios, { profile }] = await Promise.all([
-    getUsuariosAction(),
-    getUserProfile(),
-  ]);
+  const { profile } = await getUserProfile();
+
+  // Apenas Administradores podem acessar a gestão de usuários e perfis
+  if (profile?.role !== 'ADMIN') {
+    redirect('/');
+  }
+
+  const usuarios = await getUsuariosAction();
 
   return (
     <div className="space-y-6">
