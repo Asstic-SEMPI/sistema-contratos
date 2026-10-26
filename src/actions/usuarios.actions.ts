@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import type { Database, UserRole } from '@/lib/types/database.types';
 
 export type PerfilUsuarioRow = Database['public']['Tables']['perfis_usuarios']['Row'];
@@ -75,11 +76,24 @@ export async function createUsuarioAction(formData: FormData): Promise<ActionRes
     return { success: false, message: 'A senha deve ter no mínimo 6 caracteres.', error: 'INVALID_PASSWORD' };
   }
 
-  // 2. Cadastro no Auth do Supabase
+  // 2. Determinação da URL de Redirecionamento (Local vs Vercel Produção)
+  const headerList = await headers();
+  const origin = headerList.get('origin');
+  const host = headerList.get('x-forwarded-host') || headerList.get('host');
+  const proto = headerList.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+    || origin
+    || (host ? `${proto}://${host}` : 'https://sistema-contratos-pi.vercel.app');
+
+  const emailRedirectTo = `${baseUrl}/login`;
+
+  // 3. Cadastro no Auth do Supabase com Redirecionamento Seguro
   const { data: authData, error: authErr } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo,
       data: {
         nome_completo,
         id_funcional,
